@@ -2,7 +2,7 @@
 # void-universal-installer-2025.sh
 # Void Linux 2025 – Universal installer (Ethernet + WiFi auto-detect)
 # Features: optional LUKS2, GRUB password, i3/KDE/Hyprland/None, sudo/doas choice
-# Perfect for daily-driver laptops in 2025
+# Fixed: pipewire-pulse removed (built into pipewire package)
 
 set -e
 clear
@@ -74,8 +74,8 @@ fi
 mount "$ROOT_DEV" /mnt
 [ $UEFI = 1 ] && mkdir -p /mnt/boot/efi && mount "$EFI_PART" /mnt/boot/efi
 
-# ——— Packages ———
-COMMON="base-system base-devel cryptsetup bash nano vim htop curl wget git iw wireless_tools dbus elogind seatd polkit pipewire wireplumber pipewire-pulse easyeffects linux linux-firmware xdg-desktop-portal-hyprland xdg-desktop-portal-wlr xdg-desktop-portal-gtk"
+# ——— Packages (pipewire-pulse removed – built into pipewire) ———
+COMMON="base-system base-devel cryptsetup bash nano vim htop curl wget git iw wireless_tools dbus elogind seatd polkit pipewire wireplumber easyeffects linux linux-firmware xdg-desktop-portal-hyprland xdg-desktop-portal-wlr xdg-desktop-portal-gtk"
 
 case $DE in
   1) DE_PKGS="i3 i3status dmenu xorg xinit terminus-font" ;;
