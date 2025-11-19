@@ -1,8 +1,7 @@
 #!/bin/bash
 # void-universal-installer-2025.sh
 # Void Linux 2025 – Universal installer (Ethernet + WiFi auto-detect)
-# Features: optional LUKS2, GRUB password, i3/KDE/Hyprland/None, sudo/doas choice
-# Fixed: pipewire-pulse removed (built into pipewire package)
+# Fixed: xgenfstab (correct Void tool) instead of genfstab
 
 set -e
 clear
@@ -74,7 +73,7 @@ fi
 mount "$ROOT_DEV" /mnt
 [ $UEFI = 1 ] && mkdir -p /mnt/boot/efi && mount "$EFI_PART" /mnt/boot/efi
 
-# ——— Packages (pipewire-pulse removed – built into pipewire) ———
+# ——— Packages ———
 COMMON="base-system base-devel cryptsetup bash nano vim htop curl wget git iw wireless_tools dbus elogind seatd polkit pipewire wireplumber easyeffects linux linux-firmware xdg-desktop-portal-hyprland xdg-desktop-portal-wlr xdg-desktop-portal-gtk"
 
 case $DE in
@@ -90,7 +89,7 @@ case $PRIV in
 esac
 
 xbps-install -S -r /mnt -R "https://repo-default.voidlinux.org/current" $COMMON $DE_PKGS $PRIV_PKGS
-genfstab -U /mnt >> /mnt/etc/fstab
+xgenfstab -U /mnt >> /mnt/etc/fstab  # ← Fixed: xgenfstab (Void's correct tool)
 
 # ——— Chroot configuration ———
 cat > /mnt/install-final.sh <<'EOF'
