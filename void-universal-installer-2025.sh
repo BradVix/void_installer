@@ -84,7 +84,7 @@ case $DE in
 esac
 
 case $PRIV in
-  2) PRIV_PKGS="doas"; PRIV_CFG="echo 'permit persist :wheel' > /etc/doas.conf" ;;
+  2) PRIV_PKGS="opendoas"; PRIV_CFG="echo 'permit persist :wheel' > /etc/doas.conf" ;;
   *) PRIV_PKGS="sudo"; PRIV_CFG="echo '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/10-wheel" ;;
 esac
 
