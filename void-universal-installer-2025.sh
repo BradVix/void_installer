@@ -1,7 +1,7 @@
 #!/bin/bash
 # void-universal-installer-2025.sh
 # Void Linux 2025 – Universal installer (Ethernet + WiFi auto-detect)
-# Fixed: xgenfstab (correct Void tool) instead of genfstab
+# Fixed: Hyprland repo auto-added for xdg-desktop-portal-hyprland (community repo)
 
 set -e
 clear
@@ -73,13 +73,17 @@ fi
 mount "$ROOT_DEV" /mnt
 [ $UEFI = 1 ] && mkdir -p /mnt/boot/efi && mount "$EFI_PART" /mnt/boot/efi
 
-# ——— Packages ———
-COMMON="base-system base-devel cryptsetup bash nano vim htop curl wget git iw wireless_tools dbus elogind seatd polkit pipewire wireplumber easyeffects linux linux-firmware xdg-desktop-portal-hyprland xdg-desktop-portal-wlr xdg-desktop-portal-gtk"
+# ——— Packages (add Hyprland repo if needed) ———
+COMMON="base-system base-devel cryptsetup bash nano vim htop curl wget git iw wireless_tools dbus elogind seatd polkit pipewire wireplumber easyeffects linux linux-firmware xdg-desktop-portal-wlr xdg-desktop-portal-gtk"
 
 case $DE in
   1) DE_PKGS="i3 i3status dmenu xorg xinit terminus-font" ;;
   2) DE_PKGS="kde-plasma sddm konsole NetworkManager" ;;
-  3) DE_PKGS="Hyprland kitty waybar wofi mako rofi-wayland swww" ;;
+  3) 
+    # Add Hyprland community repo for Void (needed for xdg-desktop-portal-hyprland)
+    echo "repository=https://makrennel.github.io/hyprland-void/x86_64" > /etc/xbps.d/10-hyprland-void.conf
+    xbps-install -S  # Refresh repos
+    DE_PKGS="Hyprland kitty waybar wofi mako rofi-wayland swww xdg-desktop-portal-hyprland" ;;
   *) DE_PKGS="" ;;
 esac
 
@@ -89,7 +93,7 @@ case $PRIV in
 esac
 
 xbps-install -S -r /mnt -R "https://repo-default.voidlinux.org/current" $COMMON $DE_PKGS $PRIV_PKGS
-xgenfstab -U /mnt >> /mnt/etc/fstab  # ← Fixed: xgenfstab (Void's correct tool)
+xgenfstab -U /mnt >> /mnt/etc/fstab
 
 # ——— Chroot configuration ———
 cat > /mnt/install-final.sh <<'EOF'
