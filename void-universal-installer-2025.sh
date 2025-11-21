@@ -1,7 +1,7 @@
 #!/bin/bash
 # void-universal-installer-2025.sh
 # Void Linux 2025 – Universal installer (Ethernet + WiFi auto-detect)
-# Fixed: Seat group auto-created if missing + all previous fixes
+# Fixed: All chroot variables wrapped with defaults to prevent "unary operator expected"
 
 set -e
 clear
@@ -95,11 +95,20 @@ esac
 xbps-install -S -r /mnt -R "https://repo-default.voidlinux.org/current" $COMMON $DE_PKGS $PRIV_PKGS
 xgenfstab -U /mnt >> /mnt/etc/fstab
 
-# ——— Chroot configuration ———
+# ——— Chroot configuration (variables wrapped with defaults to prevent unary errors) ———
 cat > /mnt/install-final.sh <<'EOF'
 #!/bin/bash
 set -e
-export SAVE_IFACE SAVE_SSID SAVE_PASS UEFI ENCRYPT GRUBPASS DE PRIV LUKS_UUID
+# Safe defaults for all variables to prevent "unary operator expected"
+DE="${DE:-4}"
+PRIV="${PRIV:-1}"
+ENCRYPT="${ENCRYPT:-n}"
+GRUBPASS="${GRUBPASS:-n}"
+SAVE_IFACE="${SAVE_IFACE:-}"
+SAVE_SSID="${SAVE_SSID:-}"
+SAVE_PASS="${SAVE_PASS:-}"
+UEFI="${UEFI:-0}"
+LUKS_UUID="${LUKS_UUID:-}"
 
 # Hostname & hosts
 read -p "Hostname [void]: " HOSTNAME; HOSTNAME=${HOSTNAME:-void}
@@ -121,7 +130,7 @@ sed -i 's|^SHELL=.*|SHELL=/bin/bash|' /etc/default/useradd
 chsh -s /bin/bash root
 echo "Set root password:"; passwd
 
-# User (fixed: create seat group if missing)
+# User (seat group auto-created if missing)
 read -p "Create user? (y/n): " CU
 if [[ $CU == y* ]]; then
     read -p "Username: " USER
@@ -144,7 +153,8 @@ else
     [ -n "$SAVE_SSID" ] && mkdir -p /etc/wpa_supplicant && wpa_passphrase "$SAVE_SSID" "$SAVE_PASS" > "/etc/wpa_supplicant/wpa_supplicant-$SAVE_IFACE.conf"
 fi
 
-# Services
+# Services (create /var/service if missing)
+mkdir -p /var/service
 ln -s /etc/sv/{dbus,elogind,seatd,pipewire,wireplumber,pipewire-pulse} /var/service/
 [[ $DE != 2 ]] && ln -s /etc/sv/{wpa_supplicant,dhcpcd} /var/service/ 2>/dev/null || true
 [[ $DE = 2 ]] && ln -s /etc/sv/{NetworkManager,sddm} /var/service/
