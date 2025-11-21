@@ -1,7 +1,7 @@
 #!/bin/bash
 # void-universal-installer-2025.sh
 # Void Linux 2025 – Universal installer (Ethernet + WiFi auto-detect)
-# Fixed: Hyprland repo auto-added for xdg-desktop-portal-hyprland (community repo)
+# Fixed: Seat group auto-created if missing + all previous fixes
 
 set -e
 clear
@@ -121,10 +121,11 @@ sed -i 's|^SHELL=.*|SHELL=/bin/bash|' /etc/default/useradd
 chsh -s /bin/bash root
 echo "Set root password:"; passwd
 
-# User
+# User (fixed: create seat group if missing)
 read -p "Create user? (y/n): " CU
 if [[ $CU == y* ]]; then
     read -p "Username: " USER
+    getent group seat >/dev/null || groupadd -r seat
     useradd -m -G wheel,seat,audio,video,input "$USER"
     passwd "$USER"
     $PRIV_CFG
